@@ -1,0 +1,36 @@
+<variant
+    name="debug"
+    package="com.branchbuddy"
+    minSdkVersion="24"
+    targetSdkVersion="34"
+    debuggable="true"
+    mergedManifest="build\intermediates\merged_manifest\debug\processDebugMainManifest\AndroidManifest.xml"
+    partialResultsDir="build\intermediates\android_test_lint_partial_results\debug\lintAnalyzeDebugAndroidTest\out"
+    desugaredMethodsFiles="C:\Users\R User\.gradle\caches\8.10.2\transforms\7ed6a2436a8da06d238304db0bfa223b\transformed\D8BackportedDesugaredMethods.txt">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+  </sourceProviders>
+  <testSourceProviders>
+    <sourceProvider
+        manifests="src\androidTest\AndroidManifest.xml"
+        javaDirectories="src\androidTest\java;src\androidTestDebug\java;src\androidTest\kotlin;src\androidTestDebug\kotlin"
+        resDirectories="src\androidTest\res;src\androidTestDebug\res"
+        assetsDirectories="src\androidTest\assets;src\androidTestDebug\assets"
+        androidTest="true"/>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <resValues>
+    <resValue
+        type="integer"
+        name="react_native_dev_server_port"
+        value="8081" />
+  </resValues>
+  <artifact
+      type="INSTRUMENTATION_TEST"
+      applicationId="com.branchbuddy.test"
+      generatedResourceFolders="build\generated\res\resValues\androidTest\debug"
+      desugaredMethodsFiles="C:\Users\R User\.gradle\caches\8.10.2\transforms\7ed6a2436a8da06d238304db0bfa223b\transformed\D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

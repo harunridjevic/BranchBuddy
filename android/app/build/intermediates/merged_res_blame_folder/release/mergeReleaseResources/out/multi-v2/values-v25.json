@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.branchbuddy.app-mergeReleaseResources-24:/values-v25/values-v25.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\R User\\.gradle\\caches\\8.10.2\\transforms\\0b4a480b1f44b17c3f9ac0e44ed4f1ba\\transformed\\appcompat-1.6.1\\res\\values-v25\\values-v25.xml",
+                    "from": {
+                        "startLines": "2,3,4,6",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,126,209,308",
+                        "endLines": "2,3,5,7",
+                        "endColumns": "70,82,12,12",
+                        "endOffsets": "121,204,303,414"
+                    }
+                }
+            ]
+        }
+    ]
+}

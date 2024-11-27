@@ -1,0 +1,38 @@
+<variant
+    name="debug"
+    package="com.branchbuddy"
+    minSdkVersion="24"
+    targetSdkVersion="34"
+    debuggable="true"
+    mergedManifest="build\intermediates\merged_manifest\debug\processDebugMainManifest\AndroidManifest.xml"
+    manifestMergeReport="build\outputs\logs\manifest-merger-debug-report.txt"
+    proguardFiles="build\intermediates\default_proguard_files\global\proguard-android.txt-8.6.0"
+    partialResultsDir="build\intermediates\lint_partial_results\debug\lintAnalyzeDebug\out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src\main\AndroidManifest.xml;src\debug\AndroidManifest.xml"
+        javaDirectories="src\main\java;build\generated\source\codegen\java;src\debug\java;build\generated\autolinking\src\main\java;src\main\kotlin;src\debug\kotlin"
+        resDirectories="src\main\res;src\debug\res"
+        assetsDirectories="src\main\assets;src\debug\assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <resValues>
+    <resValue
+        type="integer"
+        name="react_native_dev_server_port"
+        value="8081" />
+  </resValues>
+  <artifact
+      classOutputs="build\intermediates\javac\debug\compileDebugJavaWithJavac\classes;build\tmp\kotlin-classes\debug;build\intermediates\compile_and_runtime_not_namespaced_r_class_jar\debug\processDebugResources\R.jar"
+      type="MAIN"
+      applicationId="com.branchbuddy"
+      generatedSourceFolders="build\generated\ap_generated_sources\debug\out;build\generated\source\buildConfig\debug"
+      generatedResourceFolders="build\generated\res\resValues\debug"
+      desugaredMethodsFiles="C:\Users\R User\.gradle\caches\8.10.2\transforms\7ed6a2436a8da06d238304db0bfa223b\transformed\D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

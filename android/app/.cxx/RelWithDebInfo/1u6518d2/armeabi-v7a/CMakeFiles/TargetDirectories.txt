@@ -1,0 +1,3 @@
+C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/armeabi-v7a/CMakeFiles/appmodules.dir
+C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/armeabi-v7a/CMakeFiles/rebuild_cache.dir
