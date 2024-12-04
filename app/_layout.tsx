@@ -3,16 +3,20 @@ import { StatusBar, StyleSheet, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import HomeScreen from './screens/Home';
 import ChatScreen from './screens/Chat';
+import LoginPage from './screens/Login';
+import SignUpPage from './screens/SignUp';
 
 type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
+  Login: undefined;
+  SignUp: undefined;
   Details: { id: number };
 };
 
@@ -26,6 +30,18 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track if user is authenticated
+
+  // Simulate checking for authentication status (e.g., from storage or context)
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      // Replace with actual auth check (e.g., check for token or user data)
+      const userIsAuthenticated = false; // Example, replace with actual logic
+      setIsAuthenticated(userIsAuthenticated);
+    };
+    
+    checkAuthentication();
+  }, []);
 
   useEffect(() => {
     if (loaded) {
@@ -45,6 +61,7 @@ export default function RootLayout() {
       {/* Add a global View wrapper to enforce a black background */}
       <View style={styles.container}>
         <Stack.Navigator
+          initialRouteName={isAuthenticated ? "Home" : "Login"} // Set initial route based on authentication status
           screenOptions={{
             headerStyle: {
               elevation: 0,
@@ -56,10 +73,23 @@ export default function RootLayout() {
               fontWeight: 'bold',
             },
             headerShown: false,
+            cardStyleInterpolator: ({ current, next, layouts }) => {
+              const translateX = current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-layouts.screen.width, 0],  // Start from right off-screen
+              });
+              return {
+                cardStyle: {
+                  transform: [{ translateX }],
+                },
+              };
+            },
           }}
         >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="Login" component={LoginPage} />
+          <Stack.Screen name="SignUp" component={SignUpPage} />
         </Stack.Navigator>
       </View>
     </ThemeProvider>

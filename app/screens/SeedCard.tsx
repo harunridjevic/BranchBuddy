@@ -10,8 +10,8 @@ const SeedCard = () => {
                 style={styles.image} // Apply image style
                 resizeMode="contain" // Make sure the image fits inside without cropping
             />
-            <Text style={[styles.text, styles.top_text]}>Becoming rich</Text>
-            <Text style={[styles.text, styles.description_text]}>1 hour of listening to Harun's financial advice</Text>
+            <Text style={[styles.text, styles.top_text]}>Becoming smarter</Text>
+            <Text style={[styles.text, styles.description_text]}>1 hour of reading a book</Text>
             <Image 
                 source={require('../assets/grown_tree.png')}
                 style={styles.tree}
