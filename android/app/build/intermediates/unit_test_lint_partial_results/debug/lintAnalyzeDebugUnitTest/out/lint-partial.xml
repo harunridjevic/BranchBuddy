@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.6.0" type="partial_results">
+    <map id="UnusedResources">
+        <entry
+            name="model"
+            string="integer[react_native_dev_server_port(D)];;;;"/>
+        <location id="R.integer.react_native_dev_server_port"
+            file="${:app*projectDir}/build.gradle"/>
+    </map>
+
+</incidents>

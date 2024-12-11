@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "branchbuddy-rrty",
+  "private_key_id": "4eadba5a9bac0d06100b9b2d0efccd9fa48a69db",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDDILpXpjWTrvaF\nT1bB9cbCCmG15EFwIocDLs11jPF7mHPxjH4m+8AyXsGSZm8CcaCBOoOe9XWa80eL\nNIGNeg9VGLSLlu7JNi1YZwuQsxJSAONexBV8GXD6ORlQveb5Z7vkzG1i9rNwGOru\nVv8mqu9z9eCzBFIhTDUlrgeOOgytVJAYyJTI2adNvuHU03gpESeDqFfvLiHxiPhD\nw7fqwaXVIg7NB9Wav3gNUb5t9AQMGkQD93Ctz1IWVuWqrImr8DxN5z2F//U0eBx5\neHzHgrkBR/TiWBk0sEDw5Dt2ZZnRfzX1CkQ46T5OyOfRqOkIZr6fpWcZtXEqA3bG\nB+oB1za3AgMBAAECggEACicfywO48fA+n30bVIhHST1lDCPOS9lgEQhUZHNq9TVf\ngwf+YGTlATnw9H8j84qaAV9cDd9TuTZDWLjorMXXGmRosIKv9gQ9o8Xo0iSfJWkq\na3nkbEqemEZ0TME0zXFaU3NXlbikaYbCYphgOlDWmMAIawgkhdsDQOynM/1NP495\ngpEMRRt2qp+ZvIx3EO/wxwYvsfab9o4s+JdLok52fSzR5sF0MGXtY4isKXDJtH4K\nDhn94waEn19pIz0SR9XMhtrDpZnIqIPNVbtPcjuKBO0nr+nZaUWWxC/tmcL1Q7WU\nlZqlKzZeO/nSED9jtncal3lz6mJkfeJD8bh4hc/lsQKBgQDyKtPGRNP8Zpxr1dbf\nWGWx8hchc26Mb65S/WZpgTslK8NBgYMWIGNv8JkOgqXF6xtzzBscyJWtdZm9fKGu\nMe5ezT8UY+1FKckg6lp1LS5sJrOsZsaH+sT8xCQUDgGqnUcpjoCsKTa32ZQ6zYP7\nJ6BqC2UW7oDMEtYJhuLk2CPgMwKBgQDORgzq4bvP+4jVemRgjhRIc8QO+8zz3K6w\nLZH9qcfoI8qtMgrCCqREqWd7Dx6PaYkOqyt0s38JiNzzIR02GNtAGY8y3X+st1FN\nbIj+7byiGic7Chey7NGWn0KltFKXKv8e7gcO/Pa7u+uznhXq4tDC5Ln6TBCLPpvy\nk/JAmYc7bQKBgQCudTX9duY0xgNYGERkwDz69cm+GneAipBOTykxRp1CSQWwMkoq\nbYjVQsIw1uPv8lDjmh3KHaLexILOJHQhluz/tOMFoHt1QQYZRVuHYNY5qaP0xlGt\n8nVpFzBalkCTFh0HDhcab9JwnjmQJzA2hjSlULIx0/5LhiJV2Kuqax9lSwKBgQCj\nnDB2xWGA0FRyb0faxhcUeK5T7Clea/YrS5n2h4pGeM0znvOlgWdWBsBLfWyR9/V8\nKwym3hCvcV0/g052MDUHnL5WbBXu2uCj9qia+9qZAQGI9LJjey+qttvYLzUrLjF5\nSPdUThUuRxnnOEbOLeXEEEPrYhXlPF3ZhLurvZrj6QKBgQCUq1gu7IZOIiZQGGE+\nx7LquQKXKCsvV/ycTbT4uNiQnTOSKcbCHCZ10cMNYij0pmgHsy39U5VOEoHyonky\nYyENYSgR8kJppeA1iqc7vPwoxzY1QaiysATCsjXLa6OSnQ2fnBEFOOOjIRIz34JQ\nMJOzhJYZG5dVJeZCt7GQ62LKxw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "branchbuddy@branchbuddy-rrty.iam.gserviceaccount.com",
+  "client_id": "101031032735395674694",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/branchbuddy%40branchbuddy-rrty.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

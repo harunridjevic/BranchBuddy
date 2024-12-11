@@ -1,69 +1,57 @@
-
-// Chat.tsx
 import React, { useState } from 'react';
-import { StatusBar, View, TextInput, Button, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
-import { Colors } from '../colors';
-import { Theme } from '../theme';
-import { Image } from 'react-native';
+import { View, TextInput, Button, Text } from 'react-native';
 
-const Chat = () => {
-  const [message, setMessage] = useState('');
+interface History {
+  user: string;
+  assistant: string;
+}
 
-  const handleSend = () => {
-    // Here you can implement the logic for sending the message to the AI
-    console.log('Message sent:', message);
-    setMessage(''); // Reset input after sending
+const Chatbot: React.FC = () => {
+  const [message, setMessage] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
+  const [history, setHistory] = useState<History[]>([]);
+
+  const sendMessage = async () => {
+    try {
+      const res = await fetch('https://huggingface.co/spaces/branchbuddy/bb/api/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          history: history,
+          system_message: 'You are a friendly Chatbot.',
+          max_tokens: 512,
+          temperature: 0.7,
+          top_p: 0.95,
+        }),
+      });
+
+      const data = await res.json();
+      setResponse(data.text); // Adjust this to match the response structure from your API
+      setHistory((prevHistory) => [
+        ...prevHistory,
+        { user: message, assistant: data.text },
+      ]);
+      setMessage('');
+    } catch (error) {
+      console.error('Error fetching from chatbot:', error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-     <TextInput
-        style={styles.input}
+    <View>
+      <TextInput
         value={message}
         onChangeText={setMessage}
-        placeholder="Talk to BranchBuddy..."
+        placeholder="Type your message"
+        style={{ borderWidth: 1, padding: 10 }}
       />
-
-      <TouchableOpacity onPress={handleSend}>
-        <Image
-          source={require('../assets/send_icon.png')}
-          style={styles.send_message}
-        ></Image>
-      </TouchableOpacity>
-
-      {/* Displaying chat messages could be implemented here */}
+      <Button title="Send" onPress={sendMessage} />
+      <Text>{response}</Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: 16,
-    backgroundColor: "black"
-  },
-  input: {
-    height: 60,
-    backgroundColor: Colors.primary,
-    borderColor: 'gray',
-    borderWidth: 0,
-    marginBottom: 5,
-    paddingLeft: 20,
-    paddingRight: 70,
-    color: "black",
-    borderRadius: 15,
-    fontFamily: Theme.fonts.bold,
-    fontWeight: 600,
-    fontSize: 20
-  },
-  send_message: {
-    position: 'absolute',
-    height: 30,
-    width: 30,
-    right: 20,
-    bottom: 19
-  }
-});
-
-export default Chat;
+export default Chatbot;

@@ -8,13 +8,11 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import HomeScreen from './screens/Home';
-import ChatScreen from './screens/Chat';
 import LoginPage from './screens/Login';
 import SignUpPage from './screens/SignUp';
 
 type RootStackParamList = {
   Home: undefined;
-  Chat: undefined;
   Login: undefined;
   SignUp: undefined;
   Details: { id: number };
@@ -87,7 +85,6 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="Login" component={LoginPage} />
           <Stack.Screen name="SignUp" component={SignUpPage} />
         </Stack.Navigator>

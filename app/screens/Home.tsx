@@ -14,11 +14,12 @@ import { Theme } from '../theme';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeedScreen from './Seeds';
 import NotesScreen from './Notes';
+import ChatScreen from './Chat';
+
 import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth
 
 type RootStackParamList = {
   Home: undefined;
-  Chat: undefined;
   Login: undefined;
   Details: { id: number };
 };
@@ -31,7 +32,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />); // Render the current screen
   const [username, setUsername] = useState<string>(''); // State to hold the username
 
-  const screens = [<SeedScreen />, <NotesScreen />]; // List of screens
+  const screens = [<SeedScreen />, <NotesScreen />, <NotesScreen />, <ChatScreen />]; // List of screens
 
   useEffect(() => {
     const auth = getAuth();
@@ -58,7 +59,6 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
   const go_to_chat = () => {
     console.log('Message sent');
-    navigation.navigate('Chat');
   };
 
   const go_to_login = () => {

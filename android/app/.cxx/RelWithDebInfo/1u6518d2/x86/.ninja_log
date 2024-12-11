@@ -1,0 +1,5 @@
+# ninja log v5
+10	70	0	C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/x86/CMakeFiles/cmake.verify_globs	667f1303e7e3dc2d
+6	26921	7540151587458641	CMakeFiles/appmodules.dir/C_/Users/R_User/Documents/software_dev/BranchBuddy/android/app/build/generated/autolinking/src/main/jni/autolinking.cpp.o	8cc917c5543a32ce
+1	29076	7540151609271394	CMakeFiles/appmodules.dir/OnLoad.cpp.o	87c3ec2802322a44
+29080	29994	7540151618619978	C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/build/intermediates/cxx/RelWithDebInfo/1u6518d2/obj/x86/libappmodules.so	fbddf1fa372cb711

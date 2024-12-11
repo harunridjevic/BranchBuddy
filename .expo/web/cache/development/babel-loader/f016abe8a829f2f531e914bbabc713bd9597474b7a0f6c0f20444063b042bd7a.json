@@ -1,0 +1,1 @@
+{"ast":null,"code":"export * from \"./SplashScreen\";","map":{"version":3,"names":[],"sources":["C:\\Users\\R User\\Documents\\software_dev\\BranchBuddy\\node_modules\\expo-splash-screen\\src\\index.ts"],"sourcesContent":["export * from './SplashScreen';\n"],"mappings":"AAAA","ignoreList":[]},"metadata":{},"sourceType":"module","externalDependencies":[]}
