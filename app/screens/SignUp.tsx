@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     height: '100%',
-    backgroundColor: 'black',
+    backgroundColor: '#060A09',
   },
   topbar: {
     backgroundColor: Colors.secondary,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
     color: 'white',
-    backgroundColor: 'black',
+    backgroundColor: '#060A09',
   },
   text: {
     color: 'white',

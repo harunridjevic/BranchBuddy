@@ -135,6 +135,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#060A09',
     width: '100%',
     height: '100%',
     padding: 2,
@@ -200,17 +201,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   module_screen: {
+    backgroundColor: '#060A09',
     position: 'absolute',
     top: 200,
     height: '80%',
     width: '100%',
   },
   screenContainer: {
+    backgroundColor: '#060A09',
     width: '100%',
     height: '100%',
   },
   bottom_bar: {
-    backgroundColor: 'black',
+    backgroundColor: '#060A09',
     width: '100%',
     height: 100,
     marginBottom: -10,
