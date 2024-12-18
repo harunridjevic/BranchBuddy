@@ -1,3 +1,0 @@
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/Debug/293b4a5y/x86/CMakeFiles/appmodules.dir
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/Debug/293b4a5y/x86/CMakeFiles/edit_cache.dir
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/Debug/293b4a5y/x86/CMakeFiles/rebuild_cache.dir

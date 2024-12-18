@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.blue_color,
   },
   text: {
-    color: 'black',
+    color: '#060A09',
     fontSize: 18,
     margin: 20,
   },

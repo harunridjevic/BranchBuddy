@@ -1,4 +1,0 @@
-#Fri Nov 22 22:47:57 CET 2024
-base.0=C\:\\Users\\R User\\Documents\\software_dev\\BranchBuddy\\android\\app\\build\\intermediates\\dex\\release\\mergeDexRelease\\classes.dex
-path.0=classes.dex
-renamed.0=classes.dex

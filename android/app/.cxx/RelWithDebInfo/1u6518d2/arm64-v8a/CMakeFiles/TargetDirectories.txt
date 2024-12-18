@@ -1,3 +1,0 @@
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/arm64-v8a/CMakeFiles/appmodules.dir
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/R User/Documents/software_dev/BranchBuddy/android/app/.cxx/RelWithDebInfo/1u6518d2/arm64-v8a/CMakeFiles/rebuild_cache.dir
