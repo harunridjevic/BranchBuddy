@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
@@ -10,13 +9,12 @@ import {
   Animated,
 } from 'react-native';
 import { Colors } from '../colors';
-import { Theme } from '../theme';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeedScreen from './Seeds';
 import NotesScreen from './Notes';
 import ChatScreen from './Chat';
 
-import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 type RootStackParamList = {
   Home: undefined;
@@ -27,38 +25,37 @@ type RootStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const Home: React.FC<Props> = ({ navigation }) => {
-  const [selectedButton, setSelectedButton] = useState(0); // Track selected button index
-  const [fadeAnim] = useState(new Animated.Value(1)); // Shared animated value for fade effect
-  const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />); // Render the current screen
-  const [username, setUsername] = useState<string>(''); // State to hold the username
+  const [selectedButton, setSelectedButton] = useState(0);
+  const [fadeAnim] = useState(new Animated.Value(1));
+  const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />);
+  const [username, setUsername] = useState<string>('');
 
-  const screens = [<SeedScreen />, <NotesScreen />, <NotesScreen />, <ChatScreen />]; // List of screens
+  const screens = [<SeedScreen />, <NotesScreen />, <NotesScreen />, <ChatScreen />];
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUsername(user.displayName || user.email || 'Guest'); // Use displayName, email, or 'Guest' as fallback
+        setUsername(user.displayName || user.email || 'Guest');
       } else {
-        setUsername('Guest'); // Or navigate to login if no user is logged in
-        navigation.navigate('Login'); // Automatically navigate to Login page
+        setUsername('Guest');
+        navigation.navigate('Login');
       }
     });
 
-    // Clean up the subscription on unmount
     return () => unsubscribe();
   }, [navigation]);
 
   const handleScreenChange = (index: number) => {
     if (index !== selectedButton) {
-      // Change screen after fade-out animation
       setActiveScreen(screens[index]);
       setSelectedButton(index);
     }
   };
 
   const go_to_chat = () => {
-    console.log('Message sent');
+    setActiveScreen(<ChatScreen />);
+    setSelectedButton(3); // Set the "Chat" button as selected
   };
 
   const go_to_login = () => {
@@ -70,19 +67,22 @@ const Home: React.FC<Props> = ({ navigation }) => {
       {/* Top bar */}
       <View>
         <Text style={[styles.text, { fontSize: 35, fontWeight: 'bold', margin: 20 }]}>
-          Hello {username} {/* Display username */}
+          Hello {username}
         </Text>
         <Text
-          style={[styles.text, {
-            fontSize: 19,
-            fontWeight: 'bold',
-            position: 'absolute',
-            top: 55,
-            left: 10,
-            borderBottomWidth: 5,
-            borderBottomColor: Colors.primary,
-            margin: 10,
-          }]}
+          style={[
+            styles.text,
+            {
+              fontSize: 19,
+              fontWeight: 'bold',
+              position: 'absolute',
+              top: 55,
+              left: 10,
+              borderBottomWidth: 5,
+              borderBottomColor: Colors.primary,
+              margin: 10,
+            },
+          ]}
         >
           20 Σ
         </Text>
@@ -118,17 +118,18 @@ const Home: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       </View>
 
-      <View style={styles.bottom_bar}>
-        <TouchableOpacity style={styles.input} onPress={go_to_chat}>
-          <Text style={styles.input_text}>Send message to BranchBuddy...</Text>
-          <Image
-            source={require('../assets/send_icon.png')}
-            style={styles.send_message}
-          />
-        </TouchableOpacity>
-      </View>
-
-
+      {/* Bottom bar - conditionally rendered */}
+      {selectedButton !== 3 && (
+        <View style={styles.bottom_bar}>
+          <TouchableOpacity style={styles.input} onPress={go_to_chat}>
+            <Text style={styles.input_text}>Send message to BranchBuddy...</Text>
+            <Image
+              source={require('../assets/send_icon.png')}
+              style={styles.send_message}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -146,28 +147,24 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     margin: 10,
     paddingLeft: 20,
-    paddingRight: 20, // Adjust padding to ensure proper spacing
+    paddingRight: 20,
     borderRadius: 15,
     position: 'absolute',
     bottom: 0,
-    flexDirection: 'row', // Align elements horizontally
-    justifyContent: 'space-between', // Keep text on the left and button on the right
-    alignItems: 'center', // Center elements vertically
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   input_text: {
     color: 'black',
     fontWeight: '600',
     fontSize: 20,
-    flex: 1, // Take up remaining space to push the send button to the right
-  },
-  send_button: {
-    paddingRight: 10, // Add space to the right of the button if needed
+    flex: 1,
   },
   send_message: {
     height: 30,
     width: 30,
   },
-
   text: {
     color: 'white',
   },

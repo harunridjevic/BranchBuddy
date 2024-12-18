@@ -1,3 +1,0 @@
-ninja: Entering directory `C:\Users\R User\Documents\software_dev\BranchBuddy\android\app\.cxx\Debug\293b4a5y\x86_64'
-[0/2] Re-checking globbed directories...
-ninja: no work to do.
