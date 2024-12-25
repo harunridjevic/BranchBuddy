@@ -13,6 +13,7 @@
   },
   "private": true,
   "dependencies": {
+    "@babel/plugin-transform-typescript": "^7.26.3",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.13",
@@ -20,6 +21,8 @@
     "@react-navigation/stack": "^7.0.6",
     "@types/react-native": "^0.72.8",
     "axios": "^1.7.9",
+    "babel": "^5.8.38",
+    "babel-preset-expo": "^12.0.4",
     "dialogflow": "^1.2.0",
     "expo": "~52.0.11",
     "expo-blur": "~14.0.1",

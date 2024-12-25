@@ -3,6 +3,7 @@ import { TextInput, Text, View, StyleSheet, ScrollView, TouchableOpacity, Keyboa
 import axios from 'axios';
 import { Colors } from '../colors'
 
+
 interface Message {
   role: 'user' | 'bot';
   text: string;
@@ -39,7 +40,7 @@ const ChatScreen = () => {
         .join('\n');
 
       const response = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAphD3uuKMhuUv4kSRF8CvgEk_2G1EYWBM',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + process.env.EXPO_PUBLIC_GEMINI_API_KEY,
         {
           contents: [
             {

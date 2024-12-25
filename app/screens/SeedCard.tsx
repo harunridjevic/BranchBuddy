@@ -6,14 +6,14 @@ const SeedCard = () => {
         <View style={styles.container}>
             {/* Image component for background */}
             <Image 
-                source={require('../assets/default_card_bg.png')} // Replace with your image path
+                source={require('../../assets/images/default_card_bg.png')} // Replace with your image path
                 style={styles.image} // Apply image style
                 resizeMode="contain" // Make sure the image fits inside without cropping
             />
             <Text style={[styles.text, styles.top_text]}>Becoming smarter</Text>
             <Text style={[styles.text, styles.description_text]}>1 hour of reading a book</Text>
             <Image 
-                source={require('../assets/grown_tree.png')}
+                source={require('../../assets/images/grown_tree.png')}
                 style={styles.tree}
             />
             <Text style={[styles.text, styles.day_text]}>Day 500</Text>

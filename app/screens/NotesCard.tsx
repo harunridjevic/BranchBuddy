@@ -41,7 +41,7 @@ const NotesCard: React.FC<NotesCardProps> = ({ text, onDelete, index }) => {
       <Text style={styles.text}>{text}</Text>
       <TouchableOpacity style={styles.delete} onPress={handleDelete}>
         <Image
-          source={require('../assets/trash.png')} // Replace with your actual image path
+          source={require('../../assets/images/trash.png')} // Replace with your actual image path
           style={styles.deleteIcon}
         />
       </TouchableOpacity>

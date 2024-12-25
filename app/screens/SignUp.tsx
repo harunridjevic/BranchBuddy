@@ -6,7 +6,7 @@ import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { Colors } from '../colors';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAcr-Hg5fTZWReYI1jdy0mjmX6n7Nsfaj4",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "branchbuddy-8e817.firebaseapp.com",
   projectId: "branchbuddy-8e817",
   storageBucket: "branchbuddy-8e817.firebasestorage.app",

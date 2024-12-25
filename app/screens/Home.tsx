@@ -90,7 +90,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
         </Text>
         <TouchableOpacity style={styles.account_btn} onPress={go_to_login}>
           <Image
-            source={require('../assets/account_icon.png')}
+            source={require('../../assets/images/account_icon.png')}
             style={styles.account_btn_icon}
           />
         </TouchableOpacity>
@@ -126,7 +126,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity style={styles.input} onPress={go_to_chat}>
             <Text style={styles.input_text}>Send message to BranchBuddy...</Text>
             <Image
-              source={require('../assets/send_icon.png')}
+              source={require('../../assets/images/send_icon.png')}
               style={styles.send_message}
             />
           </TouchableOpacity>
