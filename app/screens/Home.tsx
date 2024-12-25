@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
@@ -10,7 +9,6 @@ import {
   Animated,
 } from 'react-native';
 import { Colors } from '../colors';
-import { Theme } from '../theme';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeedScreen from './Seeds';
 import NotesScreen from './Notes';
@@ -31,6 +29,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const [fadeAnim] = useState(new Animated.Value(1)); // Shared animated value for fade effect
   const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />); // Render the current screen
   const [username, setUsername] = useState<string>(''); // State to hold the username
+  const [showBottomBar, setShowBottomBar] = useState<boolean>(true); // Track bottom bar visibility
 
   const screens = [<SeedScreen />, <NotesScreen />, <NotesScreen />, <ChatScreen />]; // List of screens
 
@@ -54,11 +53,14 @@ const Home: React.FC<Props> = ({ navigation }) => {
       // Change screen after fade-out animation
       setActiveScreen(screens[index]);
       setSelectedButton(index);
+      setShowBottomBar(index !== 3); // Hide bottom bar if ChatScreen is selected
     }
   };
 
   const go_to_chat = () => {
-    console.log('Message sent');
+    setSelectedButton(3); // Select the "Chat" button
+    setActiveScreen(<ChatScreen />); // Set active screen to Chat
+    setShowBottomBar(false); // Hide bottom bar when in Chat
   };
 
   const go_to_login = () => {
@@ -118,17 +120,18 @@ const Home: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       </View>
 
-      <View style={styles.bottom_bar}>
-        <TouchableOpacity style={styles.input} onPress={go_to_chat}>
-          <Text style={styles.input_text}>Send message to BranchBuddy...</Text>
-          <Image
-            source={require('../assets/send_icon.png')}
-            style={styles.send_message}
-          />
-        </TouchableOpacity>
-      </View>
-
-
+      {/* Bottom bar */}
+      {showBottomBar && (
+        <View style={styles.bottom_bar}>
+          <TouchableOpacity style={styles.input} onPress={go_to_chat}>
+            <Text style={styles.input_text}>Send message to BranchBuddy...</Text>
+            <Image
+              source={require('../assets/send_icon.png')}
+              style={styles.send_message}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -159,14 +162,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     flex: 1, // Take up remaining space to push the send button to the right
   },
-  send_button: {
-    paddingRight: 10, // Add space to the right of the button if needed
-  },
   send_message: {
     height: 30,
     width: 30,
   },
-
   text: {
     color: 'white',
   },

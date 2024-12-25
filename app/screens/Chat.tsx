@@ -1,57 +1,230 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import { TextInput, Text, View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import axios from 'axios';
+import { Colors } from '../colors'
 
-interface History {
-  user: string;
-  assistant: string;
+interface Message {
+  role: 'user' | 'bot';
+  text: string;
 }
 
-const Chatbot: React.FC = () => {
+const ChatScreen = () => {
   const [message, setMessage] = useState<string>('');
-  const [response, setResponse] = useState<string>('');
-  const [history, setHistory] = useState<History[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const sendMessage = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('https://huggingface.co/spaces/branchbuddy/bb/api/predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: message,
-          history: history,
-          system_message: 'You are a friendly Chatbot.',
-          max_tokens: 512,
-          temperature: 0.7,
-          top_p: 0.95,
-        }),
-      });
+      const updatedHistory: Message[] = [
+        ...conversationHistory,
+        { role: 'user', text: message },
+      ];
+      setConversationHistory(updatedHistory);
 
-      const data = await res.json();
-      setResponse(data.text); // Adjust this to match the response structure from your API
-      setHistory((prevHistory) => [
-        ...prevHistory,
-        { user: message, assistant: data.text },
-      ]);
-      setMessage('');
+      const personalityInstructions = `
+        You are BranchBuddy, an AI with a friendly and motivational personality. 
+        You should always encourage the user, stay positive, and offer helpful advice with a supportive tone.
+      `;
+
+      const prompt = `${personalityInstructions}\n` + updatedHistory
+        .map((entry) => {
+          if (entry.role === 'user') {
+            return `You: ${entry.text}`;
+          } else if (entry.role === 'bot') {
+            return `BranchBuddy: ${entry.text}`;
+          }
+          return '';
+        })
+        .join('\n');
+
+      const response = await axios.post(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAphD3uuKMhuUv4kSRF8CvgEk_2G1EYWBM',
+        {
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const botContent = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (botContent) {
+        setConversationHistory((prevHistory) => [
+          ...prevHistory,
+          { role: 'bot', text: botContent },
+        ]);
+      } else {
+        setConversationHistory((prevHistory) => [
+          ...prevHistory,
+          { role: 'bot', text: 'BranchBuddy is having trouble understanding, please try again!' },
+        ]);
+      }
     } catch (error) {
-      console.error('Error fetching from chatbot:', error);
+      setConversationHistory((prevHistory) => [
+        ...prevHistory,
+        { role: 'bot', text: 'Oops! Something went wrong. Let’s try again.' },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View>
-      <TextInput
-        value={message}
-        onChangeText={setMessage}
-        placeholder="Type your message"
-        style={{ borderWidth: 1, padding: 10 }}
-      />
-      <Button title="Send" onPress={sendMessage} />
-      <Text>{response}</Text>
-    </View>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <View style={styles.chatContainer}>
+        <ScrollView contentContainerStyle={styles.messageList}>
+          {conversationHistory.map((entry, index) => (
+            <View key={index} style={styles.messageContainer}>
+              {entry.role === 'user' ? (
+                <View style={styles.userMessageContainer}>
+                  <Text style={styles.userMessage}>{`You: ${entry.text}`}</Text>
+                  <View style={styles.userTriangle}></View>
+                </View>
+              ) : (
+                <View style={styles.botMessageContainer}>
+                  <View style={styles.botTriangle}></View>
+                  <Text style={styles.botMessage}>{`BranchBuddy: ${entry.text}`}</Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Input Area */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Type your message"
+          placeholderTextColor="#888"
+          style={styles.textInput}
+        />
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton} disabled={loading}>
+          <Text style={styles.sendButtonText}>{loading ? 'Sending...' : 'Send'}</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
-export default Chatbot;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  chatContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 90,
+  },
+  messageList: {
+    paddingBottom: 80,
+  },
+  messageContainer: {
+    marginBottom: 15,
+    width: '100%',
+  },
+  userMessageContainer: {
+    alignSelf: 'flex-end',
+    maxWidth: '80%',
+    marginBottom: 5,
+    
+  },
+  userMessage: {
+    color: '#000',
+    fontSize: 16,
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    maxWidth: '100%',
+    textAlign: 'right',
+  },
+  userTriangle: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 10,
+    borderLeftColor: 'transparent',
+    borderTopWidth: 10,
+    borderTopColor: Colors.primary,
+    borderBottomWidth: 10,
+    borderBottomColor: 'transparent',
+    position: 'absolute',
+    right: -10,
+    bottom: 0,
+  },
+  botMessageContainer: {
+    alignSelf: 'flex-start',
+    maxWidth: '80%',
+    marginBottom: 5,
+    position: 'relative',
+  },
+  botMessage: {
+    color: '#fff',
+    fontSize: 16,
+    backgroundColor: Colors.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    maxWidth: '100%',
+    textAlign: 'left',
+  },
+  botTriangle: {
+    width: 0,
+    height: 0,
+    borderRightWidth: 10,
+    borderRightColor: 'transparent',
+    borderTopWidth: 10,
+    borderTopColor: Colors.secondary,
+    borderBottomWidth: 10,
+    borderBottomColor: 'transparent',
+    position: 'absolute',
+    left: -10,
+    bottom: 0,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 15,
+    left: 0,
+    right: 0,
+    padding: 10,
+    backgroundColor: '#000',
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
+    padding: 21,
+    backgroundColor: '#333',
+    color: '#fff',
+    borderRadius: 15,
+    marginRight: 10,
+    fontSize: 16,
+  },
+  sendButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 15,
+  },
+  sendButtonText: {
+    color: Colors.secondary,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+export default ChatScreen;
