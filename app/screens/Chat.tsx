@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { TextInput, Text, View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TextInput, Text, View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import axios from 'axios';
-import { Colors } from '../colors'
-
+import { Colors } from '../colors';
 
 interface Message {
   role: 'user' | 'bot';
@@ -13,6 +12,22 @@ const ChatScreen = () => {
   const [message, setMessage] = useState<string>('');
   const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [inputBottom, setInputBottom] = useState(35);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
+      setInputBottom(event.endCoordinates.height - 9);
+    });
+
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setInputBottom(35);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const sendMessage = async () => {
     setLoading(true);
@@ -104,8 +119,7 @@ const ChatScreen = () => {
         </ScrollView>
       </View>
 
-      {/* Input Area */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { bottom: inputBottom }]}>
         <TextInput
           value={message}
           onChangeText={setMessage}
@@ -124,7 +138,7 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: '#000',
   },
   chatContainer: {
     flex: 1,
@@ -142,7 +156,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     maxWidth: '80%',
     marginBottom: 5,
-    
   },
   userMessage: {
     color: '#000',
@@ -199,7 +212,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     position: 'absolute',
-    bottom: 15,
     left: 0,
     right: 0,
     padding: 10,

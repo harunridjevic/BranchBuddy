@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     height: '100%',
-    backgroundColor: 'black',
+    
   },
   topbar: {
     backgroundColor: Colors.secondary,

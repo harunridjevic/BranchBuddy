@@ -13,6 +13,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeedScreen from './Seeds';
 import NotesScreen from './Notes';
 import ChatScreen from './Chat';
+import CalendarScreen from './Calendar'
 
 import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth
 
@@ -31,7 +32,7 @@ const Home: React.FC<Props> = ({ navigation }) => {
   const [username, setUsername] = useState<string>(''); // State to hold the username
   const [showBottomBar, setShowBottomBar] = useState<boolean>(true); // Track bottom bar visibility
 
-  const screens = [<SeedScreen />, <NotesScreen />, <NotesScreen />, <ChatScreen />]; // List of screens
+  const screens = [<SeedScreen />, <NotesScreen />, <CalendarScreen />, <ChatScreen />]; // List of screens
 
   useEffect(() => {
     const auth = getAuth();

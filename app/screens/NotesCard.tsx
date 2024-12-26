@@ -5,7 +5,7 @@ import { Colors } from '../colors';
 interface NotesCardProps {
   text: string;         // Text to display
   onDelete: () => void; // Function to handle delete action
-  index: number;        // Index of the note (for identifying position)
+  index: string;        // Index of the note (for identifying position, using string for Firestore doc ID)
 }
 
 const NotesCard: React.FC<NotesCardProps> = ({ text, onDelete, index }) => {

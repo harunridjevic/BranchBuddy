@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { Colors } from '../colors';
 
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+// Your Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "branchbuddy-8e817.firebaseapp.com",
@@ -15,8 +17,10 @@ const firebaseConfig = {
   measurementId: "G-PNPKDBT443"
 };
 
-initializeApp(firebaseConfig);
-const db = getFirestore();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);  // Get Firestore instance
+
 
 const SignUpPage = ({ navigation }: { navigation: any }) => {
   const [username, setUsername] = useState('');
