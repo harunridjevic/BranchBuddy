@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, Modal, TextInput, Button, StatusBar, Animated } from 'react-native';
-import { collection, addDoc } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, TextInput, Animated, Dimensions } from 'react-native';
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'; // Make sure to import deleteDoc and doc
 import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
 import NotesCard from './NotesCard';
-import {Colors} from '../colors'
-// Firebase configuration
+import { Colors } from '../colors';
+
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: "branchbuddy-8e817.firebaseapp.com",
@@ -20,69 +20,75 @@ initializeApp(firebaseConfig);
 const db = getFirestore();
 
 type Note = {
-  id: string;  // Changed to string to match Firestore document ID type
-  text: string;
+  id: string;
+  name: string;
+  contents: string;
+  color: string;
 };
 
 const Notes = () => {
-  const [notes, setNotes] = useState<Note[]>([]); // Start with an empty list
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newNoteText, setNewNoteText] = useState('');
-  const [blurOpacity] = useState(new Animated.Value(0)); // For controlling blur opacity
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [noteName, setNoteName] = useState('');
+  const [noteContents, setNoteContents] = useState('');
+  const [noteColor, setNoteColor] = useState('#FFFFFF'); // Default color
 
-  // To delete a note
-  const deleteNote = (id: string) => {
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+  // Fetch notes from Firestore
+  const fetchNotes = async () => {
+    const notesCollection = collection(db, 'notes');
+    const notesSnapshot = await getDocs(notesCollection);
+    const notesList = notesSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        contents: data.contents,
+        color: data.color,
+      };
+    });
+    setNotes(notesList);
   };
 
-  // To add a new note and save it to Firestore
-  const handleAddNote = async () => {
-    if (newNoteText.trim()) {
-      try {
-        // Add new note to Firestore
-        const docRef = await addDoc(collection(db, 'notes'), {
-          text: newNoteText.trim(),
-        });
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
-        const newNote: Note = {
-          id: docRef.id, // Firestore document ID is a string
-          text: newNoteText.trim(),
-        };
+  const addNote = async () => {
+    if (!noteName || !noteContents) return; // Ensure both fields are filled
+    const newNote = {
+      name: noteName,
+      contents: noteContents,
+      color: noteColor,
+    };
+    const docRef = await addDoc(collection(db, 'notes'), newNote);
+    setNotes((prevNotes) => [
+      ...prevNotes,
+      { id: docRef.id, ...newNote },
+    ]);
+    setShowModal(false);
+    setNoteName('');
+    setNoteContents('');
+    setNoteColor('#FFFFFF'); // Reset to default color
+  };
 
-        setNotes((prevNotes) => [...prevNotes, newNote]);
-        setNewNoteText('');
-        setModalVisible(false);
-      } catch (error) {
-        console.error('Error adding note: ', error);
-      }
+  const deleteNote = async (id: string) => {
+    const noteToRemove = notes.find((note) => note.id === id);
+    if (noteToRemove) {
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
+      await deleteDoc(doc(db, 'notes', id)); // Ensure deleteDoc and doc are properly imported
     }
   };
 
-  // Render each note with animation
   const renderItem = ({ item }: { item: Note }) => (
     <NotesCard
       key={item.id}
-      text={item.text}
-      index={item.id} // Pass the ID as index
+      name={item.name}
+      contents={item.contents}
+      color={item.color}
+      index={item.id}
       onDelete={() => deleteNote(item.id)}
     />
   );
-
-  // Blank space component to be displayed at the bottom of the list
-  const renderBlankSpace = () => <View style={styles.blank_space}></View>;
-
-  // Toggle the blur animation
-  const toggleBlurEffect = (isVisible: boolean) => {
-    Animated.timing(blurOpacity, {
-      toValue: isVisible ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  React.useEffect(() => {
-    toggleBlurEffect(modalVisible); // Trigger blur effect when modal visibility changes
-  }, [modalVisible]);
 
   return (
     <View style={styles.container}>
@@ -93,126 +99,135 @@ const Notes = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         extraData={notes}
-        ListFooterComponent={renderBlankSpace} // Add blank space at the bottom of the list
       />
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+      {/* Add Note Button */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setShowModal(true)}
+      >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
 
-      {/* Update StatusBar when modal is visible */}
-      <StatusBar barStyle="light-content" backgroundColor={modalVisible ? '#333' : '#121212'} />
+      {/* Custom Modal */}
+      {showModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Create Note</Text>
 
-      {/* Create Note Modal */}
-      <Modal visible={modalVisible} transparent={true} animationType="fade" statusBarTranslucent={true} onRequestClose={() => setModalVisible(false)}>
-        {/* Animated blur effect */}
-        <Animated.View style={[styles.blurView, { opacity: blurOpacity }]} />
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create New Note</Text>
             <TextInput
+              placeholder="Note Name"
               style={styles.input}
-              placeholder="Enter note text"
-              placeholderTextColor="#888"
-              value={newNoteText}
-              onChangeText={setNewNoteText}
+              value={noteName}
+              onChangeText={setNoteName}
             />
-            <View style={styles.modalActions}>
-              <Button title="Cancel" onPress={() => setModalVisible(false)} color="#888" />
-              <Button title="Add" onPress={handleAddNote} color="#00f" />
+            <TextInput
+              placeholder="Note Contents"
+              style={[styles.input, styles.textArea]}
+              value={noteContents}
+              onChangeText={setNoteContents}
+              multiline
+            />
+
+            <TextInput
+              placeholder="Note Color (hex)"
+              style={styles.input}
+              value={noteColor}
+              onChangeText={setNoteColor}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalButton} onPress={addNote}>
+                <Text style={styles.modalButtonText}>Add Note</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      </Modal>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background, // Dark background for the main container
-  },
-  scroll: {
-    width: '100%',
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 10,
-  },
-  blank_space: {
-    width: '100%',
-    height: 150,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  scroll: { width: '100%', flex: 1 },
+  contentContainer: { padding: 10 },
+
+  // Add Button (Circle)
   addButton: {
     position: 'absolute',
-    bottom: 140,
+    bottom: 200,
     right: 20,
-    width: 70,
-    height: 70,
-    borderRadius: 60,
-    backgroundColor: '#00f',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.blue_color,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
   },
   addButtonText: {
-    fontSize: 32,
-    color: '#fff',
-    lineHeight: 40,
+    fontSize: 40,
+    color: 'white',
   },
-  modalContainer: {
-    flex: 1,
+
+  // Modal Styles
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#333', // Dark background for modal
-    borderRadius: 10,
+  modalContainer: {
+    backgroundColor: 'white',
     padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    borderRadius: 10,
+    width: '80%',
+    maxWidth: 400,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#fff', // Light color for modal text
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    width: '100%',
+    height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: '#444', // Dark border color
     borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    color: '#fff', // Light color for input text
+    marginBottom: 15,
+    paddingLeft: 10,
   },
-  modalActions: {
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
   },
-  blurView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent overlay
+  modalButton: {
+    backgroundColor: Colors.blue_color,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  cancelButton: {
+    backgroundColor: 'gray',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

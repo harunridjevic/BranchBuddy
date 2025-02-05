@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth';
 import { Colors } from '../colors';
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+
+import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore'; // Correct imports
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -44,7 +45,7 @@ const SignUpPage = ({ navigation }: { navigation: any }) => {
       Alert.alert("Sign-Up Successful", `Welcome, ${username}!`);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }]
+        routes: [{ name: 'Login' }]
       });
     } catch (error) {
       let errorMessage = "An unknown error occurred.";

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.4]
+### Added
+- Now every note is linked to the user that made it
+- Automatic scroll to chat when the chat button is pressed
+- Implemented working remember me functionality
+
+### Bug fixes
+- Fixed input message position with keyboard up
+- Chatbot messages are remembered now
+- Stopped BranchBuddy from saying BranchBuddy: BranchBuddy: every message and made his messages shorter.
+
 ## [v0.3] - 2024-12-25
 ### Added
 - Integrated an AI chatbot on a new screen to assist users with goal-setting and guidance.

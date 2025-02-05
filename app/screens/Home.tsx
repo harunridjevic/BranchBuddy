@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -8,14 +8,15 @@ import {
   Image,
   Animated,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../colors';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SeedScreen from './Seeds';
 import NotesScreen from './Notes';
 import ChatScreen from './Chat';
-import CalendarScreen from './Calendar'
+import CalendarScreen from './Calendar';
 
-import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Firebase auth
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 type RootStackParamList = {
   Home: undefined;
@@ -26,66 +27,87 @@ type RootStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const Home: React.FC<Props> = ({ navigation }) => {
-  const [selectedButton, setSelectedButton] = useState(0); // Track selected button index
-  const [fadeAnim] = useState(new Animated.Value(1)); // Shared animated value for fade effect
-  const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />); // Render the current screen
-  const [username, setUsername] = useState<string>(''); // State to hold the username
-  const [showBottomBar, setShowBottomBar] = useState<boolean>(true); // Track bottom bar visibility
+  const [selectedButton, setSelectedButton] = useState(0);
+  const [fadeAnim] = useState(new Animated.Value(1));
+  const [activeScreen, setActiveScreen] = useState<React.ReactNode>(<SeedScreen />);
+  const [username, setUsername] = useState<string>('Guest');
+  const [showBottomBar, setShowBottomBar] = useState<boolean>(true);
+  const scrollViewRef = useRef<ScrollView>(null); // Reference for ScrollView
 
-  const screens = [<SeedScreen />, <NotesScreen />, <CalendarScreen />, <ChatScreen />]; // List of screens
+  const screens = [<SeedScreen />, <NotesScreen />, <CalendarScreen />, <ChatScreen />];
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUsername(user.displayName || user.email || 'Guest'); // Use displayName, email, or 'Guest' as fallback
+    const checkRememberedUser = async () => {
+      const rememberedUser = await AsyncStorage.getItem('rememberMeUser');
+      if (rememberedUser) {
+        setUsername(rememberedUser);
       } else {
-        setUsername('Guest'); // Or navigate to login if no user is logged in
-        navigation.navigate('Login'); // Automatically navigate to Login page
+        handleAuthState();
       }
-    });
+    };
 
-    // Clean up the subscription on unmount
-    return () => unsubscribe();
+    const handleAuthState = () => {
+      const auth = getAuth();
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const displayName = user.displayName || user.email || 'Guest';
+          setUsername(displayName);
+          AsyncStorage.setItem('rememberMeUser', displayName);
+        } else {
+          navigation.navigate('Login');
+        }
+      });
+
+      return () => unsubscribe();
+    };
+
+    checkRememberedUser();
   }, [navigation]);
 
   const handleScreenChange = (index: number) => {
     if (index !== selectedButton) {
-      // Change screen after fade-out animation
       setActiveScreen(screens[index]);
       setSelectedButton(index);
-      setShowBottomBar(index !== 3); // Hide bottom bar if ChatScreen is selected
+      setShowBottomBar(index !== 3);
     }
   };
 
   const go_to_chat = () => {
-    setSelectedButton(3); // Select the "Chat" button
-    setActiveScreen(<ChatScreen />); // Set active screen to Chat
-    setShowBottomBar(false); // Hide bottom bar when in Chat
+    // Scroll to the right smoothly to the Chat section
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: 3 * 130, animated: true }); // Assuming each button is 130px wide
+    }
+
+    setSelectedButton(3);
+    setActiveScreen(<ChatScreen />);
+    setShowBottomBar(false);
   };
 
-  const go_to_login = () => {
+  const go_to_login = async () => {
+    await AsyncStorage.removeItem('rememberMeUser');
     navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
-      {/* Top bar */}
       <View>
         <Text style={[styles.text, { fontSize: 35, fontWeight: 'bold', margin: 20 }]}>
-          Hello {username} {/* Display username */}
+          Hello {username}
         </Text>
         <Text
-          style={[styles.text, {
-            fontSize: 19,
-            fontWeight: 'bold',
-            position: 'absolute',
-            top: 55,
-            left: 10,
-            borderBottomWidth: 5,
-            borderBottomColor: Colors.primary,
-            margin: 10,
-          }]}
+          style={[
+            styles.text,
+            {
+              fontSize: 19,
+              fontWeight: 'bold',
+              position: 'absolute',
+              top: 55,
+              left: 10,
+              borderBottomWidth: 5,
+              borderBottomColor: Colors.primary,
+              margin: 10,
+            },
+          ]}
         >
           20 Σ
         </Text>
@@ -97,8 +119,11 @@ const Home: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Navigation */}
-      <ScrollView horizontal style={styles.scroll}>
+      <ScrollView
+        horizontal
+        style={styles.scroll}
+        ref={scrollViewRef} // Attach the reference here
+      >
         {['Seeds', 'Notes', 'Calendar', 'Chat'].map((item, index) => (
           <TouchableOpacity
             key={item}
@@ -110,18 +135,15 @@ const Home: React.FC<Props> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         ))}
+        <View style={{ width: 20 }} />
       </ScrollView>
 
-      {/* Animated module screen */}
       <View style={styles.module_screen}>
-        <Animated.View
-          style={[styles.screenContainer, { opacity: fadeAnim }]}
-        >
+        <Animated.View style={[styles.screenContainer, { opacity: fadeAnim }]}>
           {activeScreen}
         </Animated.View>
       </View>
 
-      {/* Bottom bar */}
       {showBottomBar && (
         <View style={styles.bottom_bar}>
           <TouchableOpacity style={styles.input} onPress={go_to_chat}>
@@ -149,19 +171,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     margin: 10,
     paddingLeft: 20,
-    paddingRight: 20, // Adjust padding to ensure proper spacing
+    paddingRight: 20,
     borderRadius: 15,
     position: 'absolute',
     bottom: 0,
-    flexDirection: 'row', // Align elements horizontally
-    justifyContent: 'space-between', // Keep text on the left and button on the right
-    alignItems: 'center', // Center elements vertically
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   input_text: {
     color: 'black',
     fontWeight: '600',
     fontSize: 20,
-    flex: 1, // Take up remaining space to push the send button to the right
+    flex: 1,
   },
   send_message: {
     height: 30,

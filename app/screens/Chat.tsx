@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, Text, View, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import {
+  TextInput,
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Keyboard,
+  Platform,
+  Dimensions,
+} from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../colors';
 
 interface Message {
@@ -12,22 +23,70 @@ const ChatScreen = () => {
   const [message, setMessage] = useState<string>('');
   const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [inputBottom, setInputBottom] = useState(35);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+  const [screenHeight, setScreenHeight] = useState<number>(Dimensions.get('window').height);
 
+  // Detect screen height changes (to detect virtual keyboard visibility)
   useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
-      setInputBottom(event.endCoordinates.height - 9);
-    });
+    const onDimensionsChange = () => {
+      setScreenHeight(Dimensions.get('window').height);
+    };
 
-    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-      setInputBottom(35);
-    });
+    const subscription = Dimensions.addEventListener('change', onDimensionsChange);
 
     return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
+      subscription.remove();
     };
   }, []);
+
+  // Adjust the input container when the keyboard shows or hides
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (e) => {
+        // Only adjust if screen height is smaller than initial height (likely indicating virtual keyboard)
+        if (screenHeight - e.endCoordinates.height < screenHeight * 0.9) {
+          setIsKeyboardVisible(true); // Virtual keyboard is visible
+        }
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setIsKeyboardVisible(false); // Keyboard is hidden
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, [screenHeight]);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const storedHistory = await AsyncStorage.getItem('chatHistory');
+        if (storedHistory) {
+          setConversationHistory(JSON.parse(storedHistory));
+        }
+      } catch (error) {
+        console.error('Failed to load conversation history:', error);
+      }
+    };
+    loadHistory();
+  }, []);
+
+  useEffect(() => {
+    const saveHistory = async () => {
+      try {
+        await AsyncStorage.setItem('chatHistory', JSON.stringify(conversationHistory));
+      } catch (error) {
+        console.error('Failed to save conversation history:', error);
+      }
+    };
+    saveHistory();
+  }, [conversationHistory]);
 
   const sendMessage = async () => {
     setLoading(true);
@@ -37,23 +96,23 @@ const ChatScreen = () => {
         { role: 'user', text: message },
       ];
       setConversationHistory(updatedHistory);
-
+  
       const personalityInstructions = `
         You are BranchBuddy, an AI with a friendly and motivational personality. 
-        You should always encourage the user, stay positive, and offer helpful advice with a supportive tone.
+        You should always encourage the user, stay positive, and offer helpful advice with a supportive tone. The messages should be short. Don't start the messages with BranchBuddy:, I REPEAT DON'T. DON'T UNDER ANY CIRCUMSTANCE PUT BranchBuddy:.
       `;
-
+  
       const prompt = `${personalityInstructions}\n` + updatedHistory
         .map((entry) => {
           if (entry.role === 'user') {
             return `You: ${entry.text}`;
           } else if (entry.role === 'bot') {
-            return `BranchBuddy: ${entry.text}`;
+            return `${entry.text}`; // No "BranchBuddy: " prefix here
           }
           return '';
         })
         .join('\n');
-
+  
       const response = await axios.post(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + process.env.EXPO_PUBLIC_GEMINI_API_KEY,
         {
@@ -73,9 +132,9 @@ const ChatScreen = () => {
           },
         }
       );
-
+  
       const botContent = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
-
+  
       if (botContent) {
         setConversationHistory((prevHistory) => [
           ...prevHistory,
@@ -87,6 +146,9 @@ const ChatScreen = () => {
           { role: 'bot', text: 'BranchBuddy is having trouble understanding, please try again!' },
         ]);
       }
+  
+      // Clear the message input
+      setMessage('');
     } catch (error) {
       setConversationHistory((prevHistory) => [
         ...prevHistory,
@@ -96,9 +158,11 @@ const ChatScreen = () => {
       setLoading(false);
     }
   };
+  
+  
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.chatContainer}>
         <ScrollView contentContainerStyle={styles.messageList}>
           {conversationHistory.map((entry, index) => (
@@ -119,7 +183,12 @@ const ChatScreen = () => {
         </ScrollView>
       </View>
 
-      <View style={[styles.inputContainer, { bottom: inputBottom }]}>
+      <View
+        style={[
+          styles.inputContainer,
+          { bottom: isKeyboardVisible ? 25 + 55 : 25 }, // Adjust based on whether virtual keyboard is visible
+        ]}
+      >
         <TextInput
           value={message}
           onChangeText={setMessage}
@@ -131,13 +200,14 @@ const ChatScreen = () => {
           <Text style={styles.sendButtonText}>{loading ? 'Sending...' : 'Send'}</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
     backgroundColor: '#000',
   },
   chatContainer: {
@@ -212,6 +282,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     position: 'absolute',
+    width: '100%',
     left: 0,
     right: 0,
     padding: 10,

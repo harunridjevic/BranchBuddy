@@ -1,28 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet } from 'react-native';
+import { Checkbox } from 'react-native-paper';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../colors';
 
+// Firebase config
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: "branchbuddy-8e817.firebaseapp.com",
-  projectId: "branchbuddy-8e817",
-  storageBucket: "branchbuddy-8e817.firebasestorage.app",
-  messagingSenderId: "322380996428",
-  appId: "1:322380996428:web:1e14d61f82a4cfe1cbb9e9",
-  measurementId: "G-PNPKDBT443"
+  authDomain: 'branchbuddy-8e817.firebaseapp.com',
+  projectId: 'branchbuddy-8e817',
+  storageBucket: 'branchbuddy-8e817.firebasestorage.app',
+  messagingSenderId: '322380996428',
+  appId: '1:322380996428:web:1e14d61f82a4cfe1cbb9e9',
+  measurementId: 'G-PNPKDBT443',
 };
 
+// Initialize Firebase
 initializeApp(firebaseConfig);
 const db = getFirestore();
 
 const LoginPage = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true); // Manage initial loading state
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const auth = getAuth();
 
@@ -32,66 +36,48 @@ const LoginPage = ({ navigation }: { navigation: any }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Optionally fetch user data
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        console.log("User Data:", userDoc.data());
+      if (rememberMe) {
+        await AsyncStorage.setItem('userEmail', email);
+      } else {
+        await AsyncStorage.removeItem('userEmail');
       }
 
-      Alert.alert("Login Successful", `Welcome back, ${user.displayName || 'User'}!`);
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        console.log('User Data:', userDoc.data());
+      }
+
+      Alert.alert('Login Successful', `Welcome back, ${user.displayName || 'User'}!`);
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }]
+        routes: [{ name: 'Home' }],
       });
     } catch (error) {
-      let errorMessage = "An unknown error occurred.";
+      let errorMessage = 'An unknown error occurred.';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      Alert.alert("Login Failed", errorMessage);
-      console.error("Login Error:", error);
+      Alert.alert('Login Failed', errorMessage);
+      console.error('Login Error:', error);
     }
   };
 
-  // Firebase auth state listener
+  // Load remembered email on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("User is logged in:", user);
-        setIsAuthenticated(true); // User is logged in
-      } else {
-        console.log("No user is logged in.");
-        setIsAuthenticated(false); // User is not logged in
+    const loadRememberedEmail = async () => {
+      const savedEmail = await AsyncStorage.getItem('userEmail');
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
       }
-      setLoading(false); // Once auth state is checked, update loading state
-    });
-
-    return () => unsubscribe(); // Cleanup the listener on unmount
-  }, [auth]);
-
-  
-  // Handle back button press
-  useEffect(() => {
-    const backAction = () => {
-      if (isAuthenticated) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }]
-        });
-      } else {
-        Alert.alert("You must be logged in to access the home screen.");
-      }
-      return true; // Prevent default back action
+      setLoading(false);
     };
 
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    loadRememberedEmail();
+  }, []);
 
-    return () => backHandler.remove();
-  }, [isAuthenticated, navigation]);
-
-  // Show the login page only if it's not loading and not authenticated
   if (loading) {
-    return null; // Don't render anything while loading the auth state
+    return null; // Don't render while loading
   }
 
   return (
@@ -117,6 +103,14 @@ const LoginPage = ({ navigation }: { navigation: any }) => {
         placeholderTextColor="white"
         cursorColor={Colors.primary}
       />
+      <View style={styles.rememberMeContainer}>
+        <Checkbox
+          status={rememberMe ? 'checked' : 'unchecked'}
+          onPress={() => setRememberMe(!rememberMe)}
+          color={Colors.primary}
+        />
+        <Text style={styles.rememberMeText}>Remember Me</Text>
+      </View>
       <Text style={styles.text}>
         Don't have an account?{'\n'}
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -134,7 +128,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     height: '100%',
-    
   },
   topbar: {
     backgroundColor: Colors.secondary,
@@ -161,6 +154,18 @@ const styles = StyleSheet.create({
     color: 'white',
     backgroundColor: 'black',
   },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+    marginLeft: -5,
+  },
+  rememberMeText: {
+    color: 'white',
+    fontSize: 16,
+    marginLeft: 8,
+  },
   text: {
     color: 'white',
     marginTop: 15,
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
     fontSize: 16,
-    marginBottom: 20
+    marginBottom: 20,
   },
   button: {
     backgroundColor: Colors.primary,

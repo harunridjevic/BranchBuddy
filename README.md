@@ -1,4 +1,4 @@
 # Welcome to the repository for Branchbuddy 
 
 ## Current version:
-v0.2
+v0.4

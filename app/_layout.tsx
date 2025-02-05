@@ -1,11 +1,11 @@
+import React, { useState, useEffect } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
-import 'react-native-reanimated';
-
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import HomeScreen from './screens/Home';
 import LoginPage from './screens/Login';
@@ -23,32 +23,56 @@ const Stack = createStackNavigator<RootStackParamList>();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+// Custom fade interpolator
+const fadeInOutInterpolator = ({ current }: { current: { progress: any } }) => {
+  return {
+    cardStyle: {
+      opacity: current.progress,
+    },
+  };
+};
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track if user is authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Track if user is authenticated
 
-  // Simulate checking for authentication status (e.g., from storage or context)
+  const auth = getAuth();
+
+  // Check if the user is authenticated when the app starts
   useEffect(() => {
     const checkAuthentication = async () => {
-      // Replace with actual auth check (e.g., check for token or user data)
-      const userIsAuthenticated = false; // Example, replace with actual logic
-      setIsAuthenticated(userIsAuthenticated);
+      // Check if the user is logged in through Firebase Auth or AsyncStorage
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // User is logged in, set authenticated state
+          setIsAuthenticated(true);
+        } else {
+          // No user logged in, check AsyncStorage for saved email
+          const savedEmail = await AsyncStorage.getItem('userEmail');
+          if (savedEmail) {
+            // If a saved email exists, we automatically authenticate the user
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+          }
+        }
+      });
     };
-    
+
     checkAuthentication();
-  }, []);
+  }, [auth]);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && isAuthenticated !== null) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, isAuthenticated]);
 
-  if (!loaded) {
-    return null;
+  if (!loaded || isAuthenticated === null) {
+    return null; // Don't render while loading or checking authentication
   }
 
   return (
@@ -59,7 +83,7 @@ export default function RootLayout() {
       {/* Add a global View wrapper to enforce a black background */}
       <View style={styles.container}>
         <Stack.Navigator
-          initialRouteName={isAuthenticated ? "Home" : "Login"} // Set initial route based on authentication status
+          initialRouteName={isAuthenticated ? 'Home' : 'Login'} // Set initial route based on authentication status
           screenOptions={{
             headerStyle: {
               elevation: 0,
@@ -71,16 +95,10 @@ export default function RootLayout() {
               fontWeight: 'bold',
             },
             headerShown: false,
-            cardStyleInterpolator: ({ current, next, layouts }) => {
-              const translateX = current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-layouts.screen.width, 0],  // Start from right off-screen
-              });
-              return {
-                cardStyle: {
-                  transform: [{ translateX }],
-                },
-              };
+            cardStyleInterpolator: fadeInOutInterpolator, // Use custom fade transition
+            transitionSpec: {
+              open: { animation: 'timing', config: { duration: 200 } }, // Change duration here
+              close: { animation: 'timing', config: { duration: 200 } }, // Change duration here
             },
           }}
         >

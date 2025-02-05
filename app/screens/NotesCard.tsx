@@ -3,12 +3,14 @@ import { View, StyleSheet, Text, Image, TouchableOpacity, Animated } from 'react
 import { Colors } from '../colors';
 
 interface NotesCardProps {
-  text: string;         // Text to display
+  name: string;         // Name of the note
+  contents: string;     // Contents of the note
+  color: string;        // Background color of the note
   onDelete: () => void; // Function to handle delete action
-  index: string;        // Index of the note (for identifying position, using string for Firestore doc ID)
+  index: string;        // Index of the note (Firestore doc ID)
 }
 
-const NotesCard: React.FC<NotesCardProps> = ({ text, onDelete, index }) => {
+const NotesCard: React.FC<NotesCardProps> = ({ name, contents, color, onDelete, index }) => {
   const [scale] = useState(new Animated.Value(1)); // Create a scale animation
   const [opacity] = useState(new Animated.Value(1)); // Create an opacity animation
   const [isDeleted, setIsDeleted] = useState(false);
@@ -35,10 +37,11 @@ const NotesCard: React.FC<NotesCardProps> = ({ text, onDelete, index }) => {
     <Animated.View
       style={[
         styles.container,
-        { transform: [{ scale }], opacity: opacity }, // Apply scale and opacity animations
+        { backgroundColor: color, transform: [{ scale }], opacity: opacity }, // Apply dynamic color and animations
       ]}
     >
-      <Text style={styles.text}>{text}</Text>
+      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.contents}>{contents}</Text>
       <TouchableOpacity style={styles.delete} onPress={handleDelete}>
         <Image
           source={require('../../assets/images/trash.png')} // Replace with your actual image path
@@ -58,12 +61,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden', // Ensures the content stays inside the rounded corners
     position: 'relative', // Allow absolute positioning of the image
-    backgroundColor: Colors.blue_color,
   },
-  text: {
+  name: {
     color: 'black',
-    fontSize: 18,
+    fontSize: 22,
+    fontWeight: 'bold',
     margin: 20,
+  },
+  contents: {
+    color: 'black',
+    fontSize: 16,
+    marginHorizontal: 20,
+    marginBottom: 50, // Space for delete button
   },
   delete: {
     width: 50,
