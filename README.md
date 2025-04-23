@@ -21,22 +21,17 @@ Your cheerful, leafy friend **BranchBuddy** is always here to motivate, guide, a
   <tr>
     <td><strong>🌱 Seeds Screen</strong><br><img src="assets/screens/seeds.png" width="200"/></td>
     <td><strong>➕ Add Seed</strong><br><img src="assets/screens/add-seed.png" width="200"/></td>
-  </tr>
-  <tr>
     <td><strong>⚙️ Settings</strong><br><img src="assets/screens/settings.png" width="200"/></td>
-    <td><strong>🔐 Login</strong><br><img src="assets/screens/login.png" width="200"/></td>
   </tr>
   <tr>
+    <td><strong>🔐 Login</strong><br><img src="assets/screens/login.png" width="200"/></td>
     <td><strong>📆 Calendar</strong><br><img src="assets/screens/calendar.png" width="200"/></td>
     <td><strong>📝 Notes</strong><br><img src="assets/screens/notes.png" width="200"/></td>
   </tr>
   <tr>
     <td><strong>➕ Add Notes</strong><br><img src="assets/screens/add-notes.png" width="200"/></td>
     <td><strong>💬 Chatbot</strong><br><img src="assets/screens/chatbot.png" width="200"/></td>
-  </tr>
-  <tr>
     <td><strong>🛍️ Shop</strong><br><img src="assets/screens/shop.png" width="200"/></td>
-    <td></td>
   </tr>
 </table>
 
