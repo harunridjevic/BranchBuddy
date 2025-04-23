@@ -52,13 +52,13 @@ Your cheerful, leafy friend **BranchBuddy** is always here to motivate, guide, a
 | File | Description |
 |------|-------------|
 | [📊 Pitch Presentation](assets/presentations/1.pptx) | Initial concept presentation |
-| [🛠 Dev/Tech Stack Presentation](assets/presentations/2.pptx) | Presentation for possible investors in the project |
+| [🛠 Final Presentation](assets/presentations/2.pptx) | Presentation for possible investors in the project |
 
 ---
 
 ## 🧠 UI Layout in Figma
 
-[<img src="assets/figma.png" width="200"/>](https://www.figma.com/design/DvUyBcEx6ETnsRFGDe05xY/UI?node-id=0-1&m=dev&t=FxIDu4nnl8Gd78Cq-1)]
+[<img src="assets/figma.png" width="200"/>](https://www.figma.com/design/DvUyBcEx6ETnsRFGDe05xY/UI?node-id=0-1&m=dev&t=FxIDu4nnl8Gd78Cq-1)
 
 Click the image to view the full UI in Figma.
 
