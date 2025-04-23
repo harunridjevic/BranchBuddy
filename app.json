@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Branch Buddy",
+    "slug": "BB",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/bb_logo.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "backgroundColor": "#000000",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/bb_logo.png",
+        "backgroundColor": "#000"
+      },
+      "package": "com.harunridjevic.branchbuddy"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/bb_logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/bb_logo_splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#000"
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0e359d5d-7d88-4ab5-a778-5d9d6d392a6f"
+      }
+    }
+  }
+}

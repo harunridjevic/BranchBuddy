@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.8]
+
+## [v0.7]
+### Added
+- Added mascot blinking
+- Made logo
+- Added 2 costumes for mascot
+- Added lots of animations
+- It's possible to earn seedcoins
+- Added shop screen
+
+## [v0.6]
+### Added 
+- Added ability to mark seeds as complete
+- Added progressbar to seeds
+- Added account screen
+- Completed account screen styling
+- Made change username work
+- Added Mascot to the app
+
+### Bug fixes
+- Fixed the bottom bar when the keyboard is up
+- When the username is too long the app will shorten it when displaying it and add three dots on the end
+- When there are no seeds there will be a no seed text
+- When there are no notes there will be a no notes text
+
+## [v0.5]
+### Added
+- Added a proper add note function
+- Added proper colors to notes
+- Made complete calendar component
+- Made calender be able to fetch notes
+- Added snap scroll to seeds
+- Added wave animation to seeds
+
+### Bug fixes
+- Fixed the delete note animation
+- Finally fixed the app background to be actually black
+- Fixed rememberMe feature
+
+
 ## [v0.4]
 ### Added
 - Now every note is linked to the user that made it

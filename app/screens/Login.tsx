@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { Checkbox } from 'react-native-paper';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  User,
+} from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { Colors } from '../colors';
 
-// Firebase config
+// Prevent duplicate Firebase initialization
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: 'branchbuddy-8e817.firebaseapp.com',
@@ -18,36 +30,66 @@ const firebaseConfig = {
   measurementId: 'G-PNPKDBT443',
 };
 
-// Initialize Firebase
-initializeApp(firebaseConfig);
-const db = getFirestore();
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const LoginPage = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [user, setUser ] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const auth = getAuth();
+  // Handle user authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser ) => {
+      setUser (currentUser );
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Load remembered email and password on mount
+  useEffect(() => {
+    const loadRememberedCredentials = async () => {
+      const savedEmail = await AsyncStorage.getItem('userEmail');
+      const savedPassword = await AsyncStorage.getItem('userPassword');
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+      if (savedPassword) {
+        setPassword(savedPassword);
+      }
+    };
+    loadRememberedCredentials();
+  }, []);
 
   // Handle login
   const handleLogin = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const loggedInUser  = userCredential.user;
 
       if (rememberMe) {
         await AsyncStorage.setItem('userEmail', email);
+        await AsyncStorage.setItem('userPassword', password); // Store password
       } else {
         await AsyncStorage.removeItem('userEmail');
+        await AsyncStorage.removeItem('userPassword'); // Remove password
       }
 
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      // Fetch user data
+      const userDoc = await getDoc(doc(db, 'users', loggedInUser .uid));
       if (userDoc.exists()) {
-        console.log('User Data:', userDoc.data());
+        console.log('User  Data:', userDoc.data());
       }
 
-      Alert.alert('Login Successful', `Welcome back, ${user.displayName || 'User'}!`);
       navigation.reset({
         index: 0,
         routes: [{ name: 'Home' }],
@@ -62,23 +104,7 @@ const LoginPage = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  // Load remembered email on mount
-  useEffect(() => {
-    const loadRememberedEmail = async () => {
-      const savedEmail = await AsyncStorage.getItem('userEmail');
-      if (savedEmail) {
-        setEmail(savedEmail);
-        setRememberMe(true);
-      }
-      setLoading(false);
-    };
-
-    loadRememberedEmail();
-  }, []);
-
-  if (loading) {
-    return null; // Don't render while loading
-  }
+  if (loading) return null; // Don't render while loading
 
   return (
     <View style={styles.container}>
@@ -124,6 +150,7 @@ const LoginPage = ({ navigation }: { navigation: any }) => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     padding: 20,

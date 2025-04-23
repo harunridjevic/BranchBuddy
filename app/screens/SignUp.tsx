@@ -40,6 +40,7 @@ const SignUpPage = ({ navigation }: { navigation: any }) => {
         username: username,
         email: email,
         createdAt: new Date(),
+        seedCoins: 0
       });
 
       Alert.alert("Sign-Up Successful", `Welcome, ${username}!`);

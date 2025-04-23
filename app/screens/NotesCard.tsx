@@ -3,50 +3,70 @@ import { View, StyleSheet, Text, Image, TouchableOpacity, Animated } from 'react
 import { Colors } from '../colors';
 
 interface NotesCardProps {
-  name: string;         // Name of the note
-  contents: string;     // Contents of the note
-  color: string;        // Background color of the note
-  onDelete: () => void; // Function to handle delete action
-  index: string;        // Index of the note (Firestore doc ID)
+  name: string;
+  contents: string;
+  color: string;
+  onDelete: () => void;
+  index: number;
+  createdAt: string;  // Add createdAt to store the note creation date
 }
 
-const NotesCard: React.FC<NotesCardProps> = ({ name, contents, color, onDelete, index }) => {
-  const [scale] = useState(new Animated.Value(1)); // Create a scale animation
-  const [opacity] = useState(new Animated.Value(1)); // Create an opacity animation
+const NotesCard: React.FC<NotesCardProps> = ({ name, contents, color, onDelete, index, createdAt }) => {
+  const [scale] = useState(new Animated.Value(1));
+  const [opacity] = useState(new Animated.Value(1));
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Trigger the burst animation on delete
+  const getDeleteButtonColor = (color: string) => {
+    switch (color) {
+      case Colors.blue_color:
+        return Colors.blue_color_secondary;
+      case Colors.red_color:
+        return Colors.red_color_secondary;
+      case Colors.green_color:
+        return Colors.green_color_secondary;
+      default:
+        return Colors.yellow_color_secondary;
+    }
+  };
+
   const handleDelete = () => {
-    // Animate scale and opacity to create the burst effect
-    Animated.sequence([
+    setIsAnimating(true); // Mark animation start
+    Animated.sequence([  
       Animated.parallel([
-        Animated.spring(scale, { toValue: 1.5, useNativeDriver: true }), // Scale up
-        Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }), // Fade out
+        Animated.spring(scale, { toValue: 1.5, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
       ]),
-      Animated.spring(scale, { toValue: 0, useNativeDriver: true }), // Shrink to 0
+      Animated.spring(scale, { toValue: 0, useNativeDriver: true }),
     ]).start(() => {
-      // Set deleted state to true after animation ends
       setIsDeleted(true);
-      onDelete(); // Call onDelete function passed from parent
+      onDelete();
     });
   };
 
-  if (isDeleted) return null; // Return null when the card is deleted
+  if (isDeleted) return null;
 
   return (
     <Animated.View
       style={[
         styles.container,
-        { backgroundColor: color, transform: [{ scale }], opacity: opacity }, // Apply dynamic color and animations
+        {
+          backgroundColor: color,
+          transform: [{ scale }],
+          opacity: opacity,
+          position: isAnimating ? 'absolute' : 'relative',
+        },
       ]}
     >
       <Text style={styles.name}>{name}</Text>
       <Text style={styles.contents}>{contents}</Text>
-      <TouchableOpacity style={styles.delete} onPress={handleDelete}>
-        <Image
-          source={require('../../assets/images/trash.png')} // Replace with your actual image path
-          style={styles.deleteIcon}
-        />
+      <Text style={styles.date}>{`Created on: ${createdAt ? createdAt.toLocaleString() : ''}`}</Text>
+
+      <TouchableOpacity
+        style={[styles.delete, { backgroundColor: getDeleteButtonColor(color) }]}
+        onPress={handleDelete}
+      >
+        <Image source={require('../../assets/images/trash.png')} style={styles.deleteIcon} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -56,11 +76,10 @@ const styles = StyleSheet.create({
   container: {
     width: '95%',
     marginLeft: 15,
-    marginTop: 20,
-    height: 170,
+    marginBottom: 20,
+    height: 180,
     borderRadius: 20,
-    overflow: 'hidden', // Ensures the content stays inside the rounded corners
-    position: 'relative', // Allow absolute positioning of the image
+    overflow: 'hidden',
   },
   name: {
     color: 'black',
@@ -72,24 +91,29 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 16,
     marginHorizontal: 20,
-    marginBottom: 50, // Space for delete button
+    marginBottom: 10,
+  },
+  date: {
+    color: 'black',
+    fontSize: 14,
+    marginLeft: 20,
+    marginBottom: 10,
   },
   delete: {
     width: 50,
     height: 50,
-    backgroundColor: Colors.blue_color_secondary,
     position: 'absolute',
     margin: 20,
     bottom: 0,
     right: 0,
     borderRadius: 10,
-    justifyContent: 'center', // Center the image inside
+    justifyContent: 'center',
     alignItems: 'center',
   },
   deleteIcon: {
-    width: 25, // Adjust the size of the image
-    height: 25, // Adjust the size of the image
-    resizeMode: 'contain', // Ensure the image fits within the bounds
+    width: 25,
+    height: 25,
+    resizeMode: 'contain',
   },
 });
 

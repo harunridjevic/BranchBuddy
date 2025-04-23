@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, View, LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,11 +10,13 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import HomeScreen from './screens/Home';
 import LoginPage from './screens/Login';
 import SignUpPage from './screens/SignUp';
+import Profile from './screens/Profile';
 
 type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   SignUp: undefined;
+  Profile: undefined;
   Details: { id: number };
 };
 
@@ -75,6 +77,9 @@ export default function RootLayout() {
     return null; // Don't render while loading or checking authentication
   }
 
+  // Disable all log notifications (not recommended for production)
+  LogBox.ignoreAllLogs();
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       {/* Set the global status bar color */}
@@ -105,6 +110,7 @@ export default function RootLayout() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Login" component={LoginPage} />
           <Stack.Screen name="SignUp" component={SignUpPage} />
+          <Stack.Screen name="Profile" component={Profile} />
         </Stack.Navigator>
       </View>
     </ThemeProvider>

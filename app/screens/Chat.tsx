@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   TextInput,
   Text,
@@ -7,12 +7,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
-  Platform,
   Dimensions,
+  AppState,
+  Image,
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../colors';
+import { getFirestore, doc, updateDoc, increment } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+
+// Initialize Firestore and Auth
+const db = getFirestore();
+const auth = getAuth();
 
 interface Message {
   role: 'user' | 'bot';
@@ -25,6 +32,7 @@ const ChatScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
   const [screenHeight, setScreenHeight] = useState<number>(Dimensions.get('window').height);
+  const scrollViewRef = useRef<ScrollView>(null); // Reference for ScrollView
 
   // Detect screen height changes (to detect virtual keyboard visibility)
   useEffect(() => {
@@ -44,16 +52,15 @@ const ChatScreen = () => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       (e) => {
-        // Only adjust if screen height is smaller than initial height (likely indicating virtual keyboard)
         if (screenHeight - e.endCoordinates.height < screenHeight * 0.9) {
-          setIsKeyboardVisible(true); // Virtual keyboard is visible
+          setIsKeyboardVisible(true);
         }
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
-        setIsKeyboardVisible(false); // Keyboard is hidden
+        setIsKeyboardVisible(false);
       }
     );
 
@@ -63,6 +70,7 @@ const ChatScreen = () => {
     };
   }, [screenHeight]);
 
+  // Load conversation history from AsyncStorage
   useEffect(() => {
     const loadHistory = async () => {
       try {
@@ -77,6 +85,7 @@ const ChatScreen = () => {
     loadHistory();
   }, []);
 
+  // Save conversation history to AsyncStorage
   useEffect(() => {
     const saveHistory = async () => {
       try {
@@ -88,7 +97,24 @@ const ChatScreen = () => {
     saveHistory();
   }, [conversationHistory]);
 
+  // Clear conversation history when the app goes to the background
+  useEffect(() => {
+    const appStateListener = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "background") {
+        // Clear conversation history when app goes to background
+        setConversationHistory([]);
+        AsyncStorage.removeItem('chatHistory');
+      }
+    });
+
+    return () => {
+      appStateListener.remove();
+    };
+  }, []);
+
   const sendMessage = async () => {
+    if (!message.trim()) return; // Prevent sending empty messages
+
     setLoading(true);
     try {
       const updatedHistory: Message[] = [
@@ -96,23 +122,16 @@ const ChatScreen = () => {
         { role: 'user', text: message },
       ];
       setConversationHistory(updatedHistory);
-  
-      const personalityInstructions = `
-        You are BranchBuddy, an AI with a friendly and motivational personality. 
-        You should always encourage the user, stay positive, and offer helpful advice with a supportive tone. The messages should be short. Don't start the messages with BranchBuddy:, I REPEAT DON'T. DON'T UNDER ANY CIRCUMSTANCE PUT BranchBuddy:.
-      `;
-  
+      scrollToBottom(); // Scroll to the bottom after updating messages
+
+      const personalityInstructions = "You are named BranchBuddy, an AI with a friendly and motivational personality. You should be supportive but realistic. The messages should be short. Also, talk as human like as possible and use slang. Respond to this message sent by the user: ";
+
       const prompt = `${personalityInstructions}\n` + updatedHistory
         .map((entry) => {
-          if (entry.role === 'user') {
-            return `You: ${entry.text}`;
-          } else if (entry.role === 'bot') {
-            return `${entry.text}`; // No "BranchBuddy: " prefix here
-          }
-          return '';
+          return entry.role === 'user' ? `${entry.text}` : `${entry.text}`;
         })
         .join('\n');
-  
+
       const response = await axios.post(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + process.env.EXPO_PUBLIC_GEMINI_API_KEY,
         {
@@ -132,9 +151,9 @@ const ChatScreen = () => {
           },
         }
       );
-  
+
       const botContent = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
-  
+
       if (botContent) {
         setConversationHistory((prevHistory) => [
           ...prevHistory,
@@ -146,10 +165,20 @@ const ChatScreen = () => {
           { role: 'bot', text: 'BranchBuddy is having trouble understanding, please try again!' },
         ]);
       }
-  
-      // Clear the message input
+
+      // Increment seedCoin for the current user
+      const user = auth.currentUser ;
+      if (user) {
+        const userRef = doc(db, 'users', user.uid); // Get the user's document reference
+        await updateDoc(userRef, {
+          seedCoins: increment(1) // Increment seedCoin by 1
+        });
+      }
+
       setMessage('');
+      scrollToBottom(); // Scroll to the bottom after sending a message
     } catch (error) {
+      console.error('Error sending message:', error); // Log the error for debugging
       setConversationHistory((prevHistory) => [
         ...prevHistory,
         { role: 'bot', text: 'Oops! Something went wrong. Let’s try again.' },
@@ -158,35 +187,42 @@ const ChatScreen = () => {
       setLoading(false);
     }
   };
-  
-  
+
+  const scrollToBottom = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  };
+
+  const renderMessage = (entry: Message, index: number) => {
+    return (
+      <View key={index} style={styles.messageContainer}>
+        {entry.role === 'user' ? (
+          <View style={styles.userMessageContainer}>
+            <Text style={styles.userMessage}>{`${entry.text}`}</Text>
+            <View style={styles.userTriangle}></View>
+          </View>
+        ) : (
+          <View style={styles.botMessageContainer}>
+            <Image source={require('../../assets/mascot/1.png')} style={styles.botProfilePic} />
+            <Text style={styles.botMessage}>{`${entry.text}`}</Text>
+            <View style={styles.botTriangle}></View>
+          </View>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.chatContainer}>
-        <ScrollView contentContainerStyle={styles.messageList}>
-          {conversationHistory.map((entry, index) => (
-            <View key={index} style={styles.messageContainer}>
-              {entry.role === 'user' ? (
-                <View style={styles.userMessageContainer}>
-                  <Text style={styles.userMessage}>{`You: ${entry.text}`}</Text>
-                  <View style={styles.userTriangle}></View>
-                </View>
-              ) : (
-                <View style={styles.botMessageContainer}>
-                  <View style={styles.botTriangle}></View>
-                  <Text style={styles.botMessage}>{`BranchBuddy: ${entry.text}`}</Text>
-                </View>
-              )}
-            </View>
-          ))}
+        <ScrollView ref={scrollViewRef} contentContainerStyle={styles.messageList}>
+          {conversationHistory.map(renderMessage)}
         </ScrollView>
       </View>
 
       <View
         style={[
           styles.inputContainer,
-          { bottom: isKeyboardVisible ? 25 + 55 : 25 }, // Adjust based on whether virtual keyboard is visible
+          { bottom: isKeyboardVisible ? 25 + 55 : 25 },
         ]}
       >
         <TextInput
@@ -255,6 +291,16 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
     marginBottom: 5,
     position: 'relative',
+    flexDirection: 'row', // Align image and text in a row
+    alignItems: 'center', // Center the image and text vertically
+  },
+  botProfilePic: {
+    width: 60, // Adjust the width as needed
+    height: 60, // Adjust the height as needed
+    borderRadius: 10, // Make it circular
+    marginRight: 10, // Space between the image and the message
+    borderColor: Colors.primary,
+    borderWidth: 3,
   },
   botMessage: {
     color: '#fff',
